@@ -1,87 +1,174 @@
+<script type="text/javascript">
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+        return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                    row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                    headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+    }
+</script>
 <!DOCTYPE html>
 <html lang="hy">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>????????? ?????? | ????? ? ?????</title>
+    <meta name="description"
+        content="Հարսանյաց հրավեր Գևորգի և Լիանայի ամուսնության արարողության համար, Հաղարծինի վանքում և «Միլագրո» ռեստորանում։">
+    <meta property="og:title" content="Գևորգ և Լիանա | Հարսանյաց Հրավեր">
+    <meta property="og:description" content="Միացե՛ք մեզ մեր կյանքի ամենակարևոր օրը՝ 2025 թվականի հոկտեմբերի 4-ին։">
+    <meta property="og:image" content="https://example.com/wedding-image.jpg">
+    <meta property="og:url" content="https://example.com/wedding-invitation">
+    <title>Հարսանյաց Հրավեր | Գևորգ և Լիանա</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Noto Serif Armenian';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('https://fonts.gstatic.com/s/notoserifarmenian/v16/Zgxt7p7aKqW4DxgqO5Q7A2gW3zLpr7E7sMbC0cQ.ttf') format('truetype');
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #FDF8F5; /* Soft cream background */
-            color: #5D4037; /* Earthy brown text */
+            background-color: #FDF8F5;
+            color: #5D4037;
+            background: linear-gradient( #f3d9d2, #db6c6c);
         }
-        .font-serif {
-            font-family: 'Cormorant Garamond', serif;
+
+        .font-serif,
+        h1,
+        h2,
+        h3,
+        h4,
+        p,
+        a,
+        div {
+            font-family: 'Noto Serif Armenian', serif;
         }
+
+        header {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            max-height: 700px;
+            min-height: 500px;
+            
+            background-size: cover;
+            background-position: center;
+        }
+
         .animate-on-scroll {
             opacity: 0;
             transform: translateY(30px);
             transition: opacity 0.8s ease-out, transform 0.8s ease-out;
         }
+
         .animate-on-scroll.is-visible {
             opacity: 1;
             transform: translateY(0);
         }
     </style>
 </head>
-<body class="antialiased">
 
+<body class="antialiased">
     <div class="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm shadow-2xl rounded-lg my-8 md:my-16 overflow-hidden">
-        
         <!-- Main Video Banner -->
-        <header class="relative h-screen min-h-[500px] md:h-[700px] flex items-center justify-center text-center text-white">
+        <header class="relative flex items-center justify-center text-center text-white">
             <div class="absolute inset-0 overflow-hidden">
-                <video autoplay loop muted playsinline class="w-full h-full object-cover">
+                <video autoplay loop muted playsinline
+                    poster="https://t3.ftcdn.net/jpg/01/98/83/18/360_F_198831835_o8OtnyAyRIInLOWaPO410L0YuZOL4wLj.jpg"
+                    class="w-full h-full object-cover">
                     <source src="https://cdn.pixabay.com/video/2020/10/24/53539-469032399_large.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
             <div class="absolute inset-0 bg-black/50"></div>
             <div class="relative z-10 p-4 animate-on-scroll is-visible">
-                <p class="text-lg md:text-2xl tracking-widest uppercase">????? ????????? ??? ???</p>
-                <h1 class="font-serif text-6xl md:text-9xl my-4">????? ? ?????</h1>
-                <p class="text-lg md:text-xl max-w-2xl mx-auto">??????????? ??? ???????????? ?????????? ?????????????</p>
+                <p class="text-lg md:text-2xl tracking-widest uppercase">Սիրով հրավիրում ենք Ձեզ</p>
+                <h1 class="font-serif text-6xl md:text-9xl my-4">Գևորգ և Լիանա</h1>
+                <p class="text-lg md:text-xl max-w-2xl mx-auto">մասնակցելու մեր ամուսնության հանդիսավոր արարողությանը
+                </p>
             </div>
         </header>
 
         <main class="p-6 md:p-12">
-
             <!-- Invitation Details Section -->
             <section class="text-center my-12 animate-on-scroll">
-                <h2 class="font-serif text-4xl md:text-5xl text-amber-900 mb-4">?????, 04 ??????????, 2025</h2>
-                <p class="text-lg md:text-xl max-w-2xl mx-auto">??? ????? ??? ???????????? ????? ????? ??? ?????? ???? ??? ??????????????</p>
+                <h2 class="font-serif text-4xl md:text-5xl text-amber-900 mb-4">Շաբաթ, 04 Հոկտեմբերի, 2025</h2>
+                <p class="text-lg md:text-xl max-w-2xl mx-auto">Մեր համար մեծ ուրախություն կլինի կիսել այս կարևոր պահը
+                    Ձեր ներկայությամբ։</p>
             </section>
-            
+
             <!-- Countdown Timer -->
             <section class="my-16 text-center animate-on-scroll">
-                 <h3 class="font-serif text-3xl text-center mb-6">??????????</h3>
-                 <div id="countdown" class="flex justify-center space-x-4 md:space-x-8 text-amber-900">
-                    <div><span id="days" class="text-4xl font-bold"></span><p>??</p></div>
-                    <div><span id="hours" class="text-4xl font-bold"></span><p>???</p></div>
-                    <div><span id="minutes" class="text-4xl font-bold"></span><p>????</p></div>
-                    <div><span id="seconds" class="text-4xl font-bold"></span><p>????????</p></div>
-                 </div>
+                <h3 class="font-serif text-3xl text-center mb-6">Հետհաշվարկ</h3>
+                <div id="countdown" class="flex justify-center space-x-4 md:space-x-8 text-amber-900"
+                    aria-live="polite">
+                    <div><span id="days" class="text-4xl font-bold"></span>
+                        <p>Օր</p>
+                    </div>
+                    <div><span id="hours" class="text-4xl font-bold"></span>
+                        <p>Ժամ</p>
+                    </div>
+                    <div><span id="minutes" class="text-4xl font-bold"></span>
+                        <p>Րոպե</p>
+                    </div>
+                    <div><span id="seconds" class="text-4xl font-bold"></span>
+                        <p>Վայրկյան</p>
+                    </div>
+                </div>
             </section>
 
             <!-- Ceremony Section -->
             <section class="my-16 animate-on-scroll">
-                <h3 class="font-serif text-4xl text-center mb-10 border-b pb-4 border-amber-200">????????????? ?????????????</h3>
+                <h3 class="font-serif text-4xl text-center mb-10 border-b pb-4 border-amber-200">Պսակադրության
+                    Արարողություն</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div class="text-center md:text-left">
-                        <h4 class="text-3xl font-semibold font-serif">????????? ??????? ???????</h4>
-                        <p class="text-amber-800 mt-2">???????, ??????? ????</p>
-                        <p class="text-amber-800 font-bold mt-2">????? 12:30</p>
-                        <a href="https://maps.google.com/?q=Haghartsin+Monastery" target="_blank" class="inline-block mt-6 bg-amber-800 text-white py-3 px-6 rounded-lg hover:bg-amber-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                            ?????? ??????? ???
+                        <h4 class="text-3xl font-semibold font-serif">Հաղարծինի վանական համալիր</h4>
+                        <p class="text-amber-800 mt-2">Դիլիջան, Տավուշի մարզ</p>
+                        <p class="text-amber-800 font-bold mt-2">Ժամը՝ 12:30</p>
+                        <a href="https://maps.google.com/?q=Haghartsin+Monastery" target="_blank"
+                            aria-label="View Haghartsin Monastery on Google Maps"
+                            class="inline-block mt-6 bg-amber-800 text-white py-3 px-6 rounded-lg hover:bg-amber-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            Տեսնել քարտեզի վրա
                         </a>
                     </div>
                     <div class="w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-lg border-4 border-white">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.327581958614!2d44.96602281539826!3d40.77701447932491!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4041ad05f639446d%3A0x358d39af772a58f!2sHaghartsin%20Monastery!5e0!3m2!1sen!2sam!4v1678891000000"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.327581958614!2d44.96602281539826!3d40.77701447932491!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4041ad05f639446d%3A0x358d39af772a58f!2sHaghartsin%20Monastery!5e0!3m2!1sen!2sam!4v1697654321234"
                             width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade">
                         </iframe>
@@ -91,53 +178,55 @@
 
             <!-- Celebration Section -->
             <section class="my-16 animate-on-scroll">
-                <h3 class="font-serif text-4xl text-center mb-10 border-b pb-4 border-amber-200">?????????? ????????????????</h3>
+                <h3 class="font-serif text-4xl text-center mb-10 border-b pb-4 border-amber-200">Հարսանեկան
+                    Տոնակատարություն</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                     <div class="w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-lg border-4 border-white md:order-last">
-                        <iframe 
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3034.50211182283!2d44.49479331539727!3d40.70678897933257!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4041a50505555555%3A0x29505c68611a4b80!2sMilgro%20Restaurant!5e0!3m2!1sen!2sam!4v1678891200000" 
-                            width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" 
+                    <div
+                        class="w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-lg border-4 border-white md:order-last">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1233.5365805058073!2d44.49607567361985!3d40.80973762946784!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4041bc05ff3538ff%3A0x873b99002fbeba44!2sRF5W%2BXMM%2C%20M8%2C%20Vanadzor!5e0!3m2!1sru!2sam!4v1756399508949!5m2!1sru!2sam"
+                            width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade">
                         </iframe>
                     </div>
                     <div class="text-center md:text-right">
-                        <h4 class="text-3xl font-semibold font-serif">�???????� ????????</h4>
-                        <p class="text-amber-800 mt-2">???????, ????? ????</p>
-                        <p class="text-amber-800 font-bold mt-2">????? 17:30</p>
-                        <a href="https://maps.google.com/?q=Milgro+Restaurant,Vanadzor" target="_blank" class="inline-block mt-6 bg-amber-800 text-white py-3 px-6 rounded-lg hover:bg-amber-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                            ?????? ??????? ???
+                        <h4 class="text-3xl font-semibold font-serif">«Միլագրո» Ռեստորան</h4>
+                        <p class="text-amber-800 mt-2">Վանաձոր, Լոռու մարզ</p>
+                        <p class="text-amber-800 font-bold mt-2">Ժամը՝ 17:30</p>
+                        <a href="https://maps.google.com/?q=Milgro+Restaurant,Vanadzor" target="_blank"
+                            aria-label="View Milgro Restaurant on Google Maps"
+                            class="inline-block mt-6 bg-amber-800 text-white py-3 px-6 rounded-lg hover:bg-amber-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            Տեսնել քարտեզի վրա
                         </a>
                     </div>
                 </div>
             </section>
-            
-            <!-- Additional Information Section -->
-            <section class="text-center bg-amber-50/50 p-8 rounded-lg my-16 animate-on-scroll">
-                 <h3 class="font-serif text-4xl mb-8">???????? ????????????</h3>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-                     <div>
-                         <h4 class="text-2xl font-semibold font-serif mb-2">???????? ??</h4>
-                         <p>??????? ??? ?????????? ??????? ??????????</p>
-                     </div>
-                     <div>
-                         <h4 class="text-2xl font-semibold font-serif mb-2">???????</h4>
-                         <p>??? ?????????????? ??? ???????? ????? ?? ???, ??????????????, ????????? ?? ???? ????????, ????? ??????? ?????? ??? ??? ???????? ????? ?????????? ?????? ?????????? ???????</p>
-                     </div>
-                 </div>
+
+            <!-- RSVP Section -->
+            <section class="text-center my-16 animate-on-scroll">
+                <h3 class="font-serif text-4xl mb-8">Հաստատեք Ձեր Ներկայությունը</h3>
+                <form action="https://formspree.io/f/your-form-id" method="POST" class="max-w-md mx-auto">
+                    <input type="text" name="name" placeholder="Անուն Ազգանուն"
+                        class="w-full p-3 mb-4 rounded-lg border border-amber-200" required aria-label="Անուն Ազգանուն">
+                    <input type="email" name="email" placeholder="Էլ. փոստ"
+                        class="w-full p-3 mb-4 rounded-lg border border-amber-200" required aria-label="Էլ. փոստ">
+                    <button type="submit"
+                        class="bg-amber-800 text-white py-3 px-6 rounded-lg hover:bg-amber-700 transition duration-300"
+                        aria-label="Հաստատել ներկայությունը">Հաստատել</button>
+                </form>
             </section>
 
+            <!-- Additional Information Section -->
+            <section class="text-center bg-amber-50/50 p-8 rounded-lg my-16 animate-on-scroll">
+                <h3 class="font-serif text-4xl mb-8">Հավելյալ Տեղեկություն</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+                    <div class="md:col-span-2 mt-4">
+                        <h4 class="text-2xl font-semibold font-serif mb-2">Ազատ ժամանց</h4>
+                        <p>Եկեղեցում պսակադրության արարողությունից հետո կարող եք ձեր ազատ ժամանակը նվիրել վայելելու դիլիջան քաղաքի տեսարժան վայրերը՝ մինչ ռեստորանում խնջույքի ժամանելը։</p>
+                    </div>
+                </div>
+            </section>
         </main>
-
-        <!-- Footer / RSVP -->
-        <footer class="text-center p-10 bg-gradient-to-t from-amber-200/50 to-transparent">
-            <div class="animate-on-scroll">
-                <h3 class="font-serif text-4xl mb-4 text-amber-900">???????? ??????????????</h3>
-                <p class="mb-6">??????? ??? ?????????? ??? ???????????? ????? ????? 2025?. ?????????? 4-??</p>
-                <a href="#" class="inline-block bg-amber-800 text-white font-bold py-3 px-10 rounded-lg hover:bg-amber-700 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                    ???????? ??????
-                </a>
-            </div>
-        </footer>
     </div>
 
     <script>
@@ -161,13 +250,18 @@
             const countDate = new Date("October 4, 2025 12:30:00").getTime();
             const now = new Date().getTime();
             const gap = countDate - now;
+            if (gap <= 0) {
+                document.getElementById('countdown').innerHTML = '<p class="text-2xl">Հարսանիքն արդեն տեղի է ունեցել:</p>';
+                return;
+            }
             const second = 1000, minute = second * 60, hour = minute * 60, day = hour * 24;
-            document.getElementById('days').innerText = Math.floor(gap / day) > 0 ? Math.floor(gap / day) : 0;
-            document.getElementById('hours').innerText = Math.floor((gap % day) / hour) > 0 ? Math.floor((gap % day) / hour) : 0;
-            document.getElementById('minutes').innerText = Math.floor((gap % hour) / minute) > 0 ? Math.floor((gap % hour) / minute) : 0;
-            document.getElementById('seconds').innerText = Math.floor((gap % minute) / second) > 0 ? Math.floor((gap % minute) / second) : 0;
+            document.getElementById('days').innerText = Math.floor(gap / day);
+            document.getElementById('hours').innerText = Math.floor((gap % day) / hour);
+            document.getElementById('minutes').innerText = Math.floor((gap % hour) / minute);
+            document.getElementById('seconds').innerText = Math.floor((gap % minute) / second);
         };
         setInterval(countdown, 1000);
     </script>
 </body>
+
 </html>
